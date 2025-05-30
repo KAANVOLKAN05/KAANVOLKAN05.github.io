@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Pipeline with Synthetic Data — Kaan Volkan</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+
+  <!-- MathJax for LaTeX math rendering -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$','$'], ['\\(','\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
+
+  <style>
+    body {
+      max-width: 800px;
+      margin: 2rem auto;
+      line-height: 1.6;
+      font-family: sans-serif;
+      padding: 0 1rem;
+    }
+    h1, h2 {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: .3em;
+    }
+    pre code {
+      font-size: .9em;
+      background: #f5f5f5;
+      padding: 1em;
+      display: block;
+      overflow-x: auto;
+    }
+    video {
+      max-width: 100%;
+      margin: 1em 0;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 6px rgba(0,0,0,.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>The Pipeline with Synthetic Data</h1>
+  <p><strong>Author:</strong> Kaan Volkan<br>
+     <strong>Date:</strong> May 2025</p>
+
+  <h2>List of Topics</h2>
+  <ol>
+    <li>Generating code for standing waves through Meinhardt’s proposed equations</li>
+    <li>Generating code for traveling waves proposed in Michaud</li>
+    <li>Conversion of npy files to tiff files</li>
+    <li>Results: Meinhardt (Standing waves)</li>
+    <li>Results: Michaud (Travelling Waves)</li>
+    <li>Results: Noise (No waves)</li>
+  </ol>
+
+  <h2>Generating Meinhardt’s Standing Waves</h2>
+  <p>The Turing equations are given by:</p>
+  <p>
+    \[
+    \frac{\partial a}{\partial t} = f_1(a,h) + D \nabla^2 a, 
+    \quad
+    \frac{\partial h}{\partial t} = f_2(a,h) + \delta \nabla^2 h,
+    \]
+    where
+    \[
+    f_1(a,h) = c_1 - c_2 a + \frac{a^2}{h\,(1 + K a^2)},
+    \quad
+    f_2(a,h) = a^2 - h.
+    \]
+  </p>
+  <p>We begin with a random distribution of species <code>a</code> and <code>h</code>, then iterate in time and save a 3D NumPy array (time × 2D space).</p>
+
+  <pre><code class="language-python">
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.animation import PillowWriter
+from pde_utils import laplacian
+
+# set random seed
+np.random.seed(42)
+
+# define parameters
+D = 1
+delta = 40
+c1 = 0.01
+c2 = 1.2
+K = 1
+
+size = 100      # number of cells
+dt   = 0.001    # time step
+dx   = 1.0      # spatial step
+t    = 100.0    # total run time
+
+A = 0.1 + 0.9 * np.random.rand(size, size)
+H = np.full((size, size), 0.1)
+
+def f1(B, C):
+    return c1 - c2*B + (B**2)/(C*(1 + K*B**2))
+
+def f2(B, C):
+    return B**2 - C
+
+frames = []
+for i in range(int(t/dt)):
+    A = A + dt * (f1(A, H) + D*laplacian(A))
+    H = H + dt * (f2(A, H) + delta*laplacian(H))
+    # Neumann BCs
+    for Z in (A, H):
+        Z[0, :] = Z[1, :]
+        Z[-1, :] = Z[-2, :]
+        Z[:, 0] = Z[:, 1]
+        Z[:, -1] = Z[:, -2]
+    if i % 2 == 0:
+        frames.append(A.copy())
+
+frames_array = np.stack(frames, axis=0)
+np.save('turing_sim.npy', frames_array)
+  </code></pre>
+
+  <h2>Generating Michaud’s Travelling Waves</h2>
+  <p>The Michaud model is described by:</p>
+  <p>
+    \[
+    \begin{aligned}
+      \frac{\partial RT}{\partial t} &= R(RT,RD,F) + D_{RT} \nabla^2 RT, \\
+      \frac{\partial RD}{\partial t} &= k_5 - k_6RD - R(RT,RD,F) + D_{RD} \nabla^2 RD, \\
+      \frac{\partial F}{\partial t}  &= k_7 + k_8\frac{RT^2}{1 + k_9RT^2} - k_{10}dW(\sigma,s)\,F + D_F \nabla^2 F,
+    \end{aligned}
+    \]
+    where
+    \[
+    R(RT,RD,F)
+      = \Bigl(k_0 + \alpha\,\frac{k_1\,RT^3}{1 + k_2RT^2}\Bigr)RD
+      - \Bigl(k_3 + k_4(1+\beta)F\Bigr)RT.
+    \]
+  </p>
+
+  <pre><code class="language-python">
+import numpy as np
+from pde_utils import correlated_gaussian_field, laplacian
+
+np.random.seed(42)
+k0, k1, k2 = 0.00625, 0.3125, 1
+k3, k4, k5 = 0.0625, 0.05625, 0.0625
+k6, k7, k8 = 0.02083, 0.001875, 0.140625
+k9, k10      = 0.25,   0.025
+Drt, Drd, Df = 0.08,   0.4,    0.001
+sigma, s     = 0.75,   4
+alpha, beta  = 1,      1
+size         = 100
+dt           = 0.1
+t_total      = 1000.0
+save_every   = 5
+dW_update    = int(10 / dt)
+
+RT = 0.1 + 0.9 * np.random.rand(size, size)
+RD = np.full((size, size), 0.1)
+F  = np.zeros((size, size))
+dW = correlated_gaussian_field(sigma, s, (size, size), 1.0)
+
+def reaction(A, B, C):
+    return (k0 + alpha*k1*A**3/(1 + k2*A**2))*B - (k3 + k4*(1+beta)*C)*A
+
+frames = []
+for i in range(int(t_total/dt)):
+    R = reaction(RT, RD, F)
+    RT += dt * (R + Drt * laplacian(RT))
+    RD += dt * (k5 - k6*RD - R + Drd * laplacian(RD))
+    F  += dt * (k7 + k8*RT**2/(1 + k9*RT**2) - k10*dW*F + Df * laplacian(F))
+    if i % dW_update == 0:
+        dW = correlated_gaussian_field(sigma, s, (size, size), 1.0)
+    if i % save_every == 0:
+        frames.append(RT.copy())
+
+frames_array = np.stack(frames, axis=0)
+np.save('michaud_simulation.npy', frames_array)
+print(f"Saved {frames_array.shape[0]} frames → 'michaud_simulation.npy'")
+  </code></pre>
+
+  <h2>Embedding Videos</h2>
+  <p>Once you’ve generated MP4s (e.g. with the code from above), you can include them like this:</p>
+
+  <video controls>
+    <source src="turing_sim.mp4" type="video/mp4">
+    Your browser doesn’t support HTML5 video.
+  </video>
+
+  <video controls>
+    <source src="michaud_sim.mp4" type="video/mp4">
+    Your browser doesn’t support HTML5 video.
+  </video>
+
+  <p>Just drop your `.mp4` files into the same folder in your repo, and those `<video>` tags will play them inline.</p>
+
+</body>
+</html>
