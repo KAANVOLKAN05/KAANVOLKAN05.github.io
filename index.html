@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -57,6 +57,10 @@
       height: auto;
       border: 1px solid #ccc;
       border-radius: 4px;
+    }
+    iframe {
+      max-width: 100%;
+      margin: 1em 0;
     }
     ul, ol {
       margin-left: 1.2em;
@@ -303,27 +307,72 @@ with tifffile.TiffFile('output_stack.tif') as tif:
     print(f"  Image shape: {tif.pages[0].shape}")
     if tif.imagej_metadata:
         print("  ImageJ metadata found: True")
-        print(f"  Frame interval from file: {tif.imagej_metadata.get('finterval', 'Not found')}")
-        print(f"  Pixel spacing from file: {tif.imagej_metadata.get('spacing', 'Not found')}")
+        print(f"  Frame interval from file: {tif.imagej_metadata.get('finterval', 'Not Found')}")
+        print(f"  Pixel spacing from file: {tif.imagej_metadata.get('spacing', 'Not Found')}")
   </code></pre>
-
-
 
   <!-- ============================ -->
   <!-- New Section: Meinhardt Results -->
   <!-- ============================ -->
   <h2>Results: Meinhardt (Standing waves)</h2>
 
-  <!-- Placeholder for the Meinhardt animation -->
+  <!-- 1) Meinhardt animation via YouTube iframe -->
   <p><strong>Animation:</strong></p>
-  <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/HeUp0wgBXxI?si=dqcyKm7UXXYFUppD&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  <iframe width="560" height="315" 
+          src="https://www.youtube-nocookie.com/embed/HeUp0wgBXxI?si=dqcyKm7UXXYFUppD&amp;controls=0" 
+          title="YouTube video player" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          referrerpolicy="strict-origin-when-cross-origin" 
+          allowfullscreen>
+  </iframe>
 
-  <!-- Placeholder for summary plot PNG -->
+  <!-- 2) Summary plot PNG -->
   <p><strong>Summary plot:</strong></p>
-  <img src="meinhard_summary.png" alt="Meinhardt Summary Plot" style="max-width:100%; margin-bottom:1em;">
-  <!-- Replace "meinhard_summary.png" with your summary plot file -->
+  <img src="https://KAANVOLKAN05.github.io\Michauds\Ch1 Mean ACF.png" alt="Meinhardt Summary Plot" style="max-width:100%; margin-bottom:1em;">
+  <!-- Replace "meinhard_summary.png" with your actual summary plot PNG filename -->
 
-  
+  <!-- 3) First 4×4 image grid (shots 1–16) -->
+  <p><strong>Standing-wave snapshots (Grid 1 of 2):</strong></p>
+  <div class="image-grid">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 1 Peak Props.png"  alt="Frame 1">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 2 Peak Props.png"  alt="Frame 2">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 3 Peak Props.png"  alt="Frame 3">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 4 Peak Props.png"  alt="Frame 4">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 5 Peak Props.png"  alt="Frame 5">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 6 Peak Props.png"  alt="Frame 6">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 7 Peak Props.png"  alt="Frame 7">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 8 Peak Props.png"  alt="Frame 8">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 9 Peak Props.png"  alt="Frame 9">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 10 Peak Props.png" alt="Frame 10">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 11 Peak Props.png" alt="Frame 11">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 12 Peak Props.png" alt="Frame 12">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 13 Peak Props.png" alt="Frame 13">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 14 Peak Props.png" alt="Frame 14">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 15 Peak Props.png" alt="Frame 15">
+    <img src="https://KAANVOLKAN05.github.io\Michauds\Individual_peak_plots\Ch1 Bin 16 Peak Props.png" alt="Frame 16">
+  </div>
+
+  <!-- 4) Second 4×4 image grid (shots 17–32) -->
+  <p><strong>Standing-wave snapshots (Grid 2 of 2):</strong></p>
+  <div class="image-grid">
+    <img src="meinhard_img17.png" alt="Frame 17">
+    <img src="meinhard_img18.png" alt="Frame 18">
+    <img src="meinhard_img19.png" alt="Frame 19">
+    <img src="meinhard_img20.png" alt="Frame 20">
+    <img src="meinhard_img21.png" alt="Frame 21">
+    <img src="meinhard_img22.png" alt="Frame 22">
+    <img src="meinhard_img23.png" alt="Frame 23">
+    <img src="meinhard_img24.png" alt="Frame 24">
+    <img src="meinhard_img25.png" alt="Frame 25">
+    <img src="meinhard_img26.png" alt="Frame 26">
+    <img src="meinhard_img27.png" alt="Frame 27">
+    <img src="meinhard_img28.png" alt="Frame 28">
+    <img src="meinhard_img29.png" alt="Frame 29">
+    <img src="meinhard_img30.png" alt="Frame 30">
+    <img src="meinhard_img31.png" alt="Frame 31">
+    <img src="meinhard_img32.png" alt="Frame 32">
+  </div>
 
   <p>— End of “Results: Meinhardt (Standing waves)” section —</p>
 
