@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Problem of Unique Identification</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem auto;
+      max-width: 800px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1, h2 {
+      margin-top: 1.5rem;
+      color: #222;
+    }
+    .title-block {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .title-block h1 {
+      margin: 0.2rem 0;
+      font-size: 2rem;
+    }
+    .title-block .meta {
+      color: #555;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    ul {
+      margin-left: 1.5rem;
+    }
+    figure {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    figure img, figure video {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    figure figcaption {
+      margin-top: 0.5rem;
+      font-style: italic;
+      color: #555;
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+    .video-container {
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .video-container video {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title-block">
+    <h1>Problem of Unique Identification</h1>
+    <div class="meta">Kaan Volkan<br />June 2025</div>
+  </div>
+
+  <section id="goal-proposition">
+    <p><span class="bold">Goal:</span> Decouple the pulsing and traveling components of a wave representing chemical concentrations.</p>
+    <p><span class="bold">Proposition:</span> It is impossible to separately identify the pulsing and traveling.</p>
+  </section>
+
+  <section id="key-definitions">
+    <h2>Key Definitions</h2>
+    <ul>
+      <li><span class="bold">Traveling wave:</span> The observed phenomena can be modeled through the spatial translation of pre-existing RT.</li>
+      <li><span class="bold">Pulse:</span> The observed phenomena can be modeled as new RTs that come into existence or are destroyed.</li>
+    </ul>
+    <div class="video-container">
+      <video autoplay loop muted playsinline>
+        <source src="wave_dyno/Wave3DSurfaceFixed.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <figcaption>3D sine wave shifting in phase (Traveling Wave) – (Z component = RT concentration)</figcaption>
+    </div>
+    <div class="video-container">
+      <video autoplay loop muted playsinline>
+        <source src="wave_dyno/PulsingGaussianSurface.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <figcaption>3D upside-down parabola pulsing in amplitude (Pulsing Wave)</figcaption>
+    </div>
+  </section>
+
+  <section id="discrete-model">
+    <h2>The Discrete Model</h2>
+    <p>
+      This model allows us to study a simplified version. It is inspired by the toy model representing the “Fermionic System with Evenly Spaced Levels” from 
+      <em>An Introduction to Thermal Physics</em> by Daniel V. Schroeder.
+    </p>
+    <p><span class="bold">The model is 1 dimensional with infinite domain reaching into negative and positive infinity.</span></p>
+
+    <figure>
+      <img src="wave_dyno/NineHorizontalLines_ManimCE_v0.18.0.png" alt="Nine horizontal line segments (Manim)" />
+      <figcaption>Figure 1</figcaption>
+    </figure>
+
+    <p><span class="bold">The dots above the line segments represent the RT concentration.</span></p>
+    <figure>
+      <img src="wave_dyno/NineHorizontalLinesWithBufferedCurve_ManimCE_v0.18.0.png" alt="Dots above line segments representing RT concentration" />
+      <figcaption>Figure 2</figcaption>
+    </figure>
+
+    <p><span class="bold">The dots above the line segments represent the RD concentration.</span></p>
+    <figure>
+      <img src="wave_dyno/NineHorizontalLinesWithBufferedCurveAndBelowDots_ManimCE_v0.18.0.png" alt="Dots above and below line segments representing RT and RD concentration" />
+      <figcaption>Figure 3</figcaption>
+    </figure>
+  </section>
+
+  <section id="wave-comparison">
+    <h2>Traveling Wave vs Pulsing Wave</h2>
+    <p class="bold">Traveling Wave</p>
+    <div class="video-container">
+      <video autoplay loop muted playsinline>
+        <source src="wave_dyno/NineHorizontalLinesWithShiftAnimation.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <figcaption>Here all the dots that make up this wave move to the right uniformly</figcaption>
+    </div>
+
+    <p class="bold">Pulsation</p>
+    <div class="video-container">
+      <video autoplay loop muted playsinline>
+        <source src="wave_dyno/NineHorizontalLinesFullAnimation.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <figcaption>Here the seeming move to the right is a result of the exchange between RT and RD through pulsation</figcaption>
+    </div>
+  </section>
+
+  <section id="result">
+    <h2>Result</h2>
+    <p>
+      You can see that the end results of both processes are the exact same if you only look at the RT concentration, but the processes are completely different. 
+      This situation only gets more complicated in 2 dimensions, and when the two motions are combined.
+    </p>
+    <p>
+      What does this simple observation tell us? You can only differentiate moving and pulsing motion by observing the concentrations of RT and RD simultaneously.
+    </p>
+  </section>
+
+</body>
+</html>
