@@ -22,7 +22,7 @@
     <ul>
       <li>"FIFO" stands for "First In/First Out" It is a buffer queue that assist CSC functionality for high rates of data. The CFEB data are buffered in FIFOs on the DAQMB. The DAQMB data are buffered in FIFOs on the DDU, and the DDU data are buffered in FIFOs on the DCC.</li>
       <li>Why the error occurs: If the CFEB is trying to send nore data then can be stored in the FIFO queue of DAQMB.</li>
-      <li>What happens then: The DDU and DCC will monitor the FIFO status and set the proper TTS (Trigger Throttling System) state, informing the TTS to slow down or disable the trigger if necessary.</li>
+      <li>What happens then: The DDU and DCC will monitor the FIFO status and set the proper TTS (Trigger Throttling System) state, informing the TTS to slow down or disable the trigger if necessary. If still not enouph, it starts discarding of data.</li>
     </ul>
   </div>
 </body>
