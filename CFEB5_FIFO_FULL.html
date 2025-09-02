@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CFEB5_FIFO_FULL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;padding:24px;line-height:1.6;color:#111;background:#fff}
+  .wrap{max-width:900px;margin:0 auto}
+  a{color:#0b5bd3;text-decoration:none}
+  a:hover{text-decoration:underline}
+  h1{margin:.2em 0 .6em;font-size:clamp(24px,4vw,40px)}
+  ul{margin:.4em 0 .6em 1.2em}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="data-flow-problems.html">← Back to plot</a></p>
+    <p><strong>Data Flow Problems:</strong></p>
+    <h1>CFEB5_FIFO_FULL</h1>
+
+    <ul>
+      <li>"FIFO" stands for "First In/First Out" It is a buffer queue that assist CSC functionality for high rates of data. The CFEB data are buffered in FIFOs on the DAQMB. The DAQMB data are buffered in FIFOs on the DDU, and the DDU data are buffered in FIFOs on the DCC.</li>
+      <li>Why the error occurs: If the CFEB is trying to send nore data then can be stored in the FIFO queue of DAQMB.</li>
+      <li>What happens then: The DDU and DCC will monitor the FIFO status and set the proper TTS (Trigger Throttling System) state, informing the TTS to slow down or disable the trigger if necessary.</li>
+    </ul>
+  </div>
+</body>
+</html>
