@@ -16,15 +16,17 @@
     --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
   }
 
-  html,body{margin:0;height:100%}
-  body{
-    font-family: var(--font);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:28px 18px 40px;
-    background:#fff;
-    color:#111;
+  html, body { margin: 0; }
+body{
+  font-family: var(--font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;          /* keep horizontal centering */
+  justify-content: flex-start;  /* was center */
+  min-height: 100vh;            /* was height:100% */
+  padding: 28px 18px 40px;
+  overflow: auto;               /* allow scroll if tall */
+}
   }
 
   .wrap{
