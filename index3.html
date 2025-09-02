@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DMB Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      position: relative;
+      display: inline-block;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: auto;
+    }
+    /* clickable terms */
+    .left-links, .right-links {
+      position: absolute;
+      top: 50px; /* adjust to align with first label */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .left-links {
+      left: -200px; /* adjust spacing from image */
+      text-align: right;
+    }
+    .right-links {
+      right: -200px;
+      text-align: left;
+    }
+    a {
+      color: blue;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>DMB: Binary Examiner Report</h1>
+  
+  <div class="container">
+    <!-- Image -->
+    <img src="DMB_Binary_Examiner.png" alt="DMB Report">
+    
+    <!-- Left terms -->
+    <div class="left-links">
+      <a href="CFEB_DAV_Error.html">CFEB DAV Error</a>
+      <a href="TMB_DAV_Error.html">TMB DAV Error</a>
+      <a href="ALCT_DAV_Error.html">ALCT DAV Error</a>
+      <a href="C_Words.html">C-Words</a>
+      <a href="DDU_Event_Size_Limit_Error.html">DDU Event Size Limit Error</a>
+      <a href="CFEB_CRC_Error.html">CFEB CRC Error</a>
+      <a href="CFEB_Sample_Count_Error.html">CFEB Sample Count Error</a>
+      <a href="CFEB_Word_Count_Per_Sample_Error.html">CFEB Word Count Per Sample Error</a>
+      <a href="TMB_CRC_Error.html">TMB CRC Error</a>
+      <a href="TMB_Word_Count_Error.html">TMB Word Count Error</a>
+      <a href="TMB_Header_Missing.html">TMB Header Missing</a>
+      <a href="TMB_Trailer_Missing.html">TMB Trailer Missing</a>
+      <a href="ALCT_Trailer_Bit_Error.html">ALCT Trailer Bit Error</a>
+      <a href="ALCT_CRC_Error.html">ALCT CRC Error</a>
+      <a href="ALCT_Word_Count_Error.html">ALCT Word Count Error</a>
+      <a href="ALCT_Header_Missing.html">ALCT Header Missing</a>
+      <a href="ALCT_Trailer_Missing.html">ALCT Trailer Missing</a>
+      <a href="DMB_Header_Missing.html">DMB Header Missing</a>
+      <a href="DMB_Trailer_Missing.html">DMB Trailer Missing</a>
+    </div>
+    
+    <!-- Right terms -->
+    <div class="right-links">
+      <a href="CFEB7_END_TIMEOUT.html">CFEB7_END_TIMEOUT</a>
+      <a href="CFEB6_END_TIMEOUT.html">CFEB6_END_TIMEOUT</a>
+      <a href="CFEB7_START_TIMEOUT.html">CFEB7_START_TIMEOUT</a>
+      <a href="CFEB6_START_TIMEOUT.html">CFEB6_START_TIMEOUT</a>
+      <a href="CFEB7_FIFO_FULL.html">CFEB7_FIFO_FULL</a>
+      <a href="CFEB6_FIFO_FULL.html">CFEB6_FIFO_FULL</a>
+      <a href="B_words_found.html">B-words found</a>
+      <a href="CFEB_Error.html">CFEB Error</a>
+      <a href="CFEB5_END_TIMEOUT.html">CFEB5_END_TIMEOUT</a>
+      <a href="CFEB4_END_TIMEOUT.html">CFEB4_END_TIMEOUT</a>
+      <a href="CFEB3_END_TIMEOUT.html">CFEB3_END_TIMEOUT</a>
+      <a href="CFEB2_END_TIMEOUT.html">CFEB2_END_TIMEOUT</a>
+      <a href="CFEB1_END_TIMEOUT.html">CFEB1_END_TIMEOUT</a>
+      <a href="TMB_END_TIMEOUT.html">TMB_END_TIMEOUT</a>
+      <a href="ALCT_END_TIMEOUT.html">ALCT_END_TIMEOUT</a>
+      <a href="CFEB5_START_TIMEOUT.html">CFEB5_START_TIMEOUT</a>
+      <a href="CFEB4_START_TIMEOUT.html">CFEB4_START_TIMEOUT</a>
+      <a href="CFEB3_START_TIMEOUT.html">CFEB3_START_TIMEOUT</a>
+      <a href="CFEB2_START_TIMEOUT.html">CFEB2_START_TIMEOUT</a>
+      <a href="CFEB1_START_TIMEOUT.html">CFEB1_START_TIMEOUT</a>
+      <a href="TMB_START_TIMEOUT.html">TMB_START_TIMEOUT</a>
+      <a href="ALCT_START_TIMEOUT.html">ALCT_START_TIMEOUT</a>
+      <a href="CFEB5_FIFO_FULL.html">CFEB5_FIFO_FULL</a>
+      <a href="CFEB4_FIFO_FULL.html">CFEB4_FIFO_FULL</a>
+      <a href="CFEB3_FIFO_FULL.html">CFEB3_FIFO_FULL</a>
+      <a href="CFEB2_FIFO_FULL.html">CFEB2_FIFO_FULL</a>
+      <a href="CFEB1_FIFO_FULL.html">CFEB1_FIFO_FULL</a>
+      <a href="TMB_FIFO_FULL.html">TMB_FIFO_FULL</a>
+      <a href="ALCT_FIFO_FULL.html">ALCT_FIFO_FULL</a>
+    </div>
+  </div>
+</body>
+</html>
