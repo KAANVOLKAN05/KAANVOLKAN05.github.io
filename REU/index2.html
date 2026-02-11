@@ -24,16 +24,47 @@
   }
   .body {
     display: flex;
-    background-color: black;
-    padding: 6px;
-    margin: 6px;
+    flex-direction: column;
+    border: 2px solid black;
+    background-color: white;
+    padding: 4px;
+    padding-bottom: 30px;
+    margin: 4px;
     border-radius: 25px;
   }
   .sub_body{
-    
+    display: flex;
+    flex-direction: row;
+    width: 70%;
+  }
+  .image-container img {
+  width:100%;
+  height: 100%;
+  object-fit: contain;
+  }
+  figcaption {
+  color: black;
+  font-style: italic;
+  padding: 2px;
+  text-align: center;
+  }
+  .whole-image-container{
+    border: 2px solid black;
+    background-color: beige;
+    margin: 8px;
+    border-radius: 25px;
+  }
+  .section{
+    width: 90%;
+    border: 2px solid black;
+    background-color: rgb(150, 150, 140);
+    margin: 10px;
+    padding: 4px;
+    border-radius: 25px;
+
   }
 </style>
-<body>
+<body>    
 <div class = "head">
     <h1>Chemical Wave Formation, PDEs</h1>
 </div>
@@ -46,12 +77,75 @@
     <strong>Members :</strong> Kaan Volkan, <a href="url">Neil Gabrielson</a>, Naiwen Wang
 </div>
 <div class = "body">
-    <div class = "sub_body">
-        <h3 style="color: white">Investigation of Existing Models </h3>
+    <div class = "section">
+        <h2 style="color: black">Investigation of Existing Models </h2>
+        <div class = "sub_body">
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="ReactionDiffusion1952.png" alt="Turing">
+                </div>
+                <figcaption>Turing's Reaction Diffusion Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Mori.png" alt="Turing">
+                </div>
+                <figcaption>Mori et. al. (2008) Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Michaud.png" alt="Turing">
+                </div>
+                <figcaption>Michaud et. al. (2022) Model</figcaption>
+            </div>
+        </div>
+    </div> 
+    <div class = "section">
+        <h2 style="color: black">Investigation of Existing Models </h2>
+        <div class = "sub_body">
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="ReactionDiffusion1952.png" alt="Turing">
+                </div>
+                <figcaption>Turing's Reaction Diffusion Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Mori.png" alt="Turing">
+                </div>
+                <figcaption>Mori et. al. (2008) Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Michaud.png" alt="Turing">
+                </div>
+                <figcaption>Michaud et. al. (2022) Model</figcaption>
+            </div>
+        </div>
     </div>
-    <div class = "sub_body">
-        <img src="ReactionDiffusion1952.png" alt="Italian Trulli">
-    </div>
+    <div class = "section">
+        <h2 style="color: black">Computation Simulation of Models </h2>
+        <div class = "sub_body">
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Meinhardt_GIF.gif" alt="Turing">
+                </div>
+                <figcaption>Turing's Reaction Diffusion Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Mori.png" alt="Turing">
+                </div>
+                <figcaption>Mori et. al. (2008) Model</figcaption>
+            </div>
+            <div class = "whole-image-container">
+                <div class = "image-container">
+                    <img src="Michaud.png" alt="Turing">
+                </div>
+                <figcaption>Michaud et. al. (2022) Model</figcaption>
+            </div>
+        </div>
+    </div>   
 </div>
 
 
