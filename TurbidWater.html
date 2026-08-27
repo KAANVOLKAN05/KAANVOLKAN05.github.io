@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 
 <body>
@@ -22,7 +24,13 @@
     <label for="yAxis">Y axis:</label>
     <select id="yAxis"></select>
 
+    <br><br>
+
+    <div id="graph" style="width:100%; height:600px;"></div>
+
+
     <script>
+
         let simulationData = [];
         let columnNames = [];
 
@@ -54,13 +62,14 @@
                     return row;
                 });
 
+
                 document.getElementById('status').textContent =
                     `Loaded ${simulationData.length} simulations.`;
 
 
-                // X and Y axis dropdowns
                 const xAxis = document.getElementById('xAxis');
                 const yAxis = document.getElementById('yAxis');
+
 
                 columnNames.forEach(column => {
 
@@ -81,6 +90,11 @@
                 });
 
 
+                // Default axes
+                xAxis.value = 'DomainZ';
+                yAxis.value = 'WeightedMedianPosition';
+
+
                 // mus dropdown
                 const musSelect = document.getElementById('musSelect');
 
@@ -91,6 +105,7 @@
                 musValues.forEach(value => {
 
                     const option = document.createElement('option');
+
                     option.value = value;
                     option.textContent = value;
 
@@ -109,12 +124,14 @@
                 muaValues.forEach(value => {
 
                     const checkbox = document.createElement('input');
+
                     checkbox.type = 'checkbox';
                     checkbox.value = value;
                     checkbox.id = `mua_${value}`;
                     checkbox.checked = true;
 
                     const label = document.createElement('label');
+
                     label.htmlFor = checkbox.id;
                     label.textContent = value;
 
@@ -122,9 +139,103 @@
                     muaOptions.appendChild(label);
                     muaOptions.appendChild(document.createElement('br'));
 
+                    checkbox.addEventListener('change', updateGraph);
+
+                });
+
+
+                musSelect.addEventListener('change', updateGraph);
+                xAxis.addEventListener('change', updateGraph);
+                yAxis.addEventListener('change', updateGraph);
+
+
+                updateGraph();
+
+            });
+
+
+
+        function updateGraph() {
+
+            const selectedMus =
+                Number(document.getElementById('musSelect').value);
+
+            const selectedX =
+                document.getElementById('xAxis').value;
+
+            const selectedY =
+                document.getElementById('yAxis').value;
+
+
+            const selectedMua = Array.from(
+                document.querySelectorAll('#muaOptions input:checked')
+            ).map(box => Number(box.value));
+
+
+            const traces = [];
+
+
+            selectedMua.forEach(muaValue => {
+
+                let filtered = simulationData.filter(row =>
+                    row.mus === selectedMus &&
+                    row.mua === muaValue
+                );
+
+
+                filtered.sort((a, b) =>
+                    a[selectedX] - b[selectedX]
+                );
+
+
+                traces.push({
+
+                    x: filtered.map(row => row[selectedX]),
+
+                    y: filtered.map(row => row[selectedY]),
+
+                    mode: 'lines+markers',
+
+                    type: 'scatter',
+
+                    name: `mua = ${muaValue}`
+
                 });
 
             });
+
+
+            const layout = {
+
+                xaxis: {
+                    title: selectedX
+                },
+
+                yaxis: {
+                    title: selectedY
+                },
+
+                legend: {
+                    title: {
+                        text: 'mua'
+                    }
+                },
+
+                margin: {
+                    t: 30
+                }
+
+            };
+
+
+            Plotly.react(
+                'graph',
+                traces,
+                layout,
+                {responsive: true}
+            );
+
+        }
 
     </script>
 
