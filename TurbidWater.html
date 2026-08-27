@@ -8,23 +8,24 @@
 
     <p id="status">Loading CSV...</p>
 
+    <label for="musSelect">mus:</label>
+    <select id="musSelect"></select>
+
+    <br><br>
+
     <label for="xAxis">X axis:</label>
     <select id="xAxis"></select>
 
     <label for="yAxis">Y axis:</label>
     <select id="yAxis"></select>
 
+
     <script>
         let simulationData = [];
         let columnNames = [];
 
         fetch('data/summary.csv')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Could not load CSV");
-                }
-                return response.text();
-            })
+            .then(response => response.text())
             .then(text => {
 
                 const lines = text.trim().split(/\r?\n/);
@@ -51,34 +52,53 @@
                     return row;
                 });
 
+
+                document.getElementById('status').textContent =
+                    `Loaded ${simulationData.length} simulations.`;
+
+
+                // X and Y axis dropdowns
                 const xAxis = document.getElementById('xAxis');
                 const yAxis = document.getElementById('yAxis');
 
                 columnNames.forEach(column => {
 
-                    const xOption = document.createElement('option');
-                    xOption.value = column;
-                    xOption.textContent = column;
-                    xAxis.appendChild(xOption);
+                    if (column !== 'RunID') {
 
-                    const yOption = document.createElement('option');
-                    yOption.value = column;
-                    yOption.textContent = column;
-                    yAxis.appendChild(yOption);
+                        const xOption = document.createElement('option');
+                        xOption.value = column;
+                        xOption.textContent = column;
+                        xAxis.appendChild(xOption);
+
+                        const yOption = document.createElement('option');
+                        yOption.value = column;
+                        yOption.textContent = column;
+                        yAxis.appendChild(yOption);
+                    }
 
                 });
 
-                document.getElementById('status').textContent =
-                    `Loaded ${simulationData.length} simulations — ${columnNames.length} columns.`;
-                
 
-            })
-            .catch(error => {
+                // mus dropdown
+                const musSelect = document.getElementById('musSelect');
 
-                document.getElementById('status').textContent =
-                    "ERROR: " + error.message;
+                const musValues = [
+                    ...new Set(simulationData.map(row => row.mus))
+                ].sort((a, b) => a - b);
+
+                musValues.forEach(value => {
+
+                    const option = document.createElement('option');
+
+                    option.value = value;
+                    option.textContent = value;
+
+                    musSelect.appendChild(option);
+
+                });
 
             });
+
     </script>
 
 </body>
