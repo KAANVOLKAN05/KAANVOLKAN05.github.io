@@ -30,22 +30,20 @@ fetch('data/summary.csv')
         document.getElementById('status').textContent =
             `Loaded ${simulationData.length} simulations.`;
 
-        console.log(columnNames);
-        console.log(simulationData[0]);
         const xAxisSelect = document.getElementById('xAxis');
         const yAxisSelect = document.getElementById('yAxis');
 
+        xAxisSelect.innerHTML = '';
+        yAxisSelect.innerHTML = '';
+
         columnNames.forEach(column => {
 
-            const xOption = document.createElement('option');
-            xOption.value = column;
-            xOption.textContent = column;
-            xAxisSelect.appendChild(xOption);
+            xAxisSelect.innerHTML +=
+                `<option value="${column}">${column}</option>`;
 
-            const yOption = document.createElement('option');
-            yOption.value = column;
-            yOption.textContent = column;
-            yAxisSelect.appendChild(yOption);
+            yAxisSelect.innerHTML +=
+                `<option value="${column}">${column}</option>`;
 
         });
+
     });
