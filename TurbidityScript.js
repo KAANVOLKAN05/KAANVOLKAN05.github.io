@@ -6,7 +6,6 @@ fetch('data/summary.csv')
     .then(text => {
 
         const lines = text.trim().split('\n');
-        document.getElementById('status').textContent =`CSV lines: ${lines.length}, last line: ${lines[lines.length - 1]}`;
 
         columnNames = lines[0].split(',');
 
