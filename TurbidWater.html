@@ -11,14 +11,16 @@
     <label for="musSelect">mus:</label>
     <select id="musSelect"></select>
 
-    <br><br>
+    <p>mua values:</p>
+    <div id="muaOptions"></div>
+
+    <br>
 
     <label for="xAxis">X axis:</label>
     <select id="xAxis"></select>
 
     <label for="yAxis">Y axis:</label>
     <select id="yAxis"></select>
-
 
     <script>
         let simulationData = [];
@@ -52,7 +54,6 @@
                     return row;
                 });
 
-
                 document.getElementById('status').textContent =
                     `Loaded ${simulationData.length} simulations.`;
 
@@ -74,6 +75,7 @@
                         yOption.value = column;
                         yOption.textContent = column;
                         yAxis.appendChild(yOption);
+
                     }
 
                 });
@@ -89,11 +91,36 @@
                 musValues.forEach(value => {
 
                     const option = document.createElement('option');
-
                     option.value = value;
                     option.textContent = value;
 
                     musSelect.appendChild(option);
+
+                });
+
+
+                // mua checkboxes
+                const muaOptions = document.getElementById('muaOptions');
+
+                const muaValues = [
+                    ...new Set(simulationData.map(row => row.mua))
+                ].sort((a, b) => a - b);
+
+                muaValues.forEach(value => {
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = value;
+                    checkbox.id = `mua_${value}`;
+                    checkbox.checked = true;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.textContent = value;
+
+                    muaOptions.appendChild(checkbox);
+                    muaOptions.appendChild(label);
+                    muaOptions.appendChild(document.createElement('br'));
 
                 });
 
