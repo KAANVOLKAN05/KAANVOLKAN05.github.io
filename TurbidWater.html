@@ -28,11 +28,18 @@
 
     <div id="graph" style="width:100%; height:600px;"></div>
 
+    <hr>
+
+    <h3 id="selectedRun">Click a data point to view its detector distribution</h3>
+
+    <div id="runGraph" style="width:100%; height:500px;"></div>
+
 
     <script>
 
         let simulationData = [];
         let columnNames = [];
+
 
         fetch('data/summary.csv')
             .then(response => response.text())
@@ -43,6 +50,7 @@
                 columnNames = lines[0]
                     .split(',')
                     .map(column => column.trim());
+
 
                 simulationData = lines.slice(1).map(line => {
 
@@ -60,6 +68,7 @@
                     });
 
                     return row;
+
                 });
 
 
@@ -90,21 +99,22 @@
                 });
 
 
-                // Default axes
                 xAxis.value = 'DomainZ';
                 yAxis.value = 'WeightedMedianPosition';
 
 
-                // mus dropdown
-                const musSelect = document.getElementById('musSelect');
+                const musSelect =
+                    document.getElementById('musSelect');
 
                 const musValues = [
                     ...new Set(simulationData.map(row => row.mus))
                 ].sort((a, b) => a - b);
 
+
                 musValues.forEach(value => {
 
-                    const option = document.createElement('option');
+                    const option =
+                        document.createElement('option');
 
                     option.value = value;
                     option.textContent = value;
@@ -114,42 +124,82 @@
                 });
 
 
-                // mua checkboxes
-                const muaOptions = document.getElementById('muaOptions');
+                const muaOptions =
+                    document.getElementById('muaOptions');
 
                 const muaValues = [
                     ...new Set(simulationData.map(row => row.mua))
                 ].sort((a, b) => a - b);
 
+
                 muaValues.forEach(value => {
 
-                    const checkbox = document.createElement('input');
+                    const checkbox =
+                        document.createElement('input');
 
                     checkbox.type = 'checkbox';
                     checkbox.value = value;
                     checkbox.id = `mua_${value}`;
                     checkbox.checked = true;
 
-                    const label = document.createElement('label');
+
+                    const label =
+                        document.createElement('label');
 
                     label.htmlFor = checkbox.id;
                     label.textContent = value;
 
+
                     muaOptions.appendChild(checkbox);
                     muaOptions.appendChild(label);
-                    muaOptions.appendChild(document.createElement('br'));
+                    muaOptions.appendChild(
+                        document.createElement('br')
+                    );
 
-                    checkbox.addEventListener('change', updateGraph);
+
+                    checkbox.addEventListener(
+                        'change',
+                        updateGraph
+                    );
 
                 });
 
 
-                musSelect.addEventListener('change', updateGraph);
-                xAxis.addEventListener('change', updateGraph);
-                yAxis.addEventListener('change', updateGraph);
+                musSelect.addEventListener(
+                    'change',
+                    updateGraph
+                );
+
+                xAxis.addEventListener(
+                    'change',
+                    updateGraph
+                );
+
+                yAxis.addEventListener(
+                    'change',
+                    updateGraph
+                );
 
 
-                updateGraph();
+                updateGraph().then(() => {
+
+                    const graph =
+                        document.getElementById('graph');
+
+
+                    graph.on('plotly_click', function(eventData) {
+
+                        const point =
+                            eventData.points[0];
+
+                        const runID =
+                            point.customdata;
+
+                        loadRun(runID);
+
+                    });
+
+                });
 
             });
 
@@ -158,17 +208,29 @@
         function updateGraph() {
 
             const selectedMus =
-                Number(document.getElementById('musSelect').value);
+                Number(
+                    document.getElementById(
+                        'musSelect'
+                    ).value
+                );
+
 
             const selectedX =
-                document.getElementById('xAxis').value;
+                document.getElementById(
+                    'xAxis'
+                ).value;
+
 
             const selectedY =
-                document.getElementById('yAxis').value;
+                document.getElementById(
+                    'yAxis'
+                ).value;
 
 
             const selectedMua = Array.from(
-                document.querySelectorAll('#muaOptions input:checked')
+                document.querySelectorAll(
+                    '#muaOptions input:checked'
+                )
             ).map(box => Number(box.value));
 
 
@@ -177,10 +239,11 @@
 
             selectedMua.forEach(muaValue => {
 
-                let filtered = simulationData.filter(row =>
-                    row.mus === selectedMus &&
-                    row.mua === muaValue
-                );
+                let filtered =
+                    simulationData.filter(row =>
+                        row.mus === selectedMus &&
+                        row.mua === muaValue
+                    );
 
 
                 filtered.sort((a, b) =>
@@ -190,15 +253,29 @@
 
                 traces.push({
 
-                    x: filtered.map(row => row[selectedX]),
+                    x: filtered.map(
+                        row => row[selectedX]
+                    ),
 
-                    y: filtered.map(row => row[selectedY]),
+                    y: filtered.map(
+                        row => row[selectedY]
+                    ),
+
+                    customdata: filtered.map(
+                        row => row.RunID
+                    ),
 
                     mode: 'lines+markers',
 
                     type: 'scatter',
 
-                    name: `mua = ${muaValue}`
+                    name: `mua = ${muaValue}`,
+
+                    hovertemplate:
+                        `${selectedX}: %{x}<br>` +
+                        `${selectedY}: %{y}<br>` +
+                        `Run: %{customdata}` +
+                        `<extra></extra>`
 
                 });
 
@@ -228,12 +305,113 @@
             };
 
 
-            Plotly.react(
+            return Plotly.react(
                 'graph',
                 traces,
                 layout,
-                {responsive: true}
+                {
+                    responsive: true
+                }
             );
+
+        }
+
+
+
+        function loadRun(runID) {
+
+            document.getElementById(
+                'selectedRun'
+            ).textContent =
+                `Detector distribution: ${runID}`;
+
+
+            fetch(`data/runs/${runID}.csv`)
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `Could not load ${runID}`
+                        );
+                    }
+
+                    return response.text();
+
+                })
+                .then(text => {
+
+                    const lines =
+                        text.trim().split(/\r?\n/);
+
+
+                    const x = [];
+                    const y = [];
+
+
+                    lines.slice(1).forEach(line => {
+
+                        const values =
+                            line.split(',');
+
+                        x.push(
+                            Number(values[0])
+                        );
+
+                        y.push(
+                            Number(values[1])
+                        );
+
+                    });
+
+
+                    const trace = {
+
+                        x: x,
+
+                        y: y,
+
+                        mode: 'lines+markers',
+
+                        type: 'scatter',
+
+                        name: runID
+
+                    };
+
+
+                    const layout = {
+
+                        xaxis: {
+                            title: 'x bin position'
+                        },
+
+                        yaxis: {
+                            title: 'Escaping photon weight'
+                        },
+
+                        title: runID
+
+                    };
+
+
+                    Plotly.react(
+                        'runGraph',
+                        [trace],
+                        layout,
+                        {
+                            responsive: true
+                        }
+                    );
+
+                })
+                .catch(error => {
+
+                    document.getElementById(
+                        'selectedRun'
+                    ).textContent =
+                        `Error: ${error.message}`;
+
+                });
 
         }
 
