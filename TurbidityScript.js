@@ -32,4 +32,20 @@ fetch('data/summary.csv')
 
         console.log(columnNames);
         console.log(simulationData[0]);
+        const xAxisSelect = document.getElementById('xAxis');
+        const yAxisSelect = document.getElementById('yAxis');
+
+        columnNames.forEach(column => {
+
+            const xOption = document.createElement('option');
+            xOption.value = column;
+            xOption.textContent = column;
+            xAxisSelect.appendChild(xOption);
+
+            const yOption = document.createElement('option');
+            yOption.value = column;
+            yOption.textContent = column;
+            yAxisSelect.appendChild(yOption);
+
+        });
     });
