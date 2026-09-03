@@ -33,6 +33,22 @@
     <h3 id="selectedRun">Click a data point to view its detector distribution</h3>
 
     <div id="runGraph" style="width:100%; height:500px;"></div>
+    The <strong>x-axis</strong> represents the position where photons exit the detector surface.
+    The <strong>y-axis</strong>, labeled <strong>Escaping Photon Weight</strong>, is the sum of the
+    remaining statistical weights of all photons exiting within each spatial bin.
+    </p>
+
+    <p>
+    This is not simply the number of detected photons. Photons lose weight as energy is absorbed
+    while traveling through the simulated medium. Therefore, photons that experience greater
+    absorption contribute less to the detected signal.
+    </p>
+
+    <p>
+    Escaping photon weight can be interpreted as a <strong>relative detected intensity</strong>.
+    However, it does not currently have physical units such as W/m² because the simulation does
+    not specify an absolute optical source power.
+    </p>
 
 
     <script>
