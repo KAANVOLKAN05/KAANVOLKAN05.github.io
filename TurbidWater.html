@@ -336,100 +336,101 @@
 
         function loadRun(runID) {
 
-            document.getElementById(
-                'selectedRun'
-            ).textContent =
-                `Detector distribution: ${runID}`;
+    const runInfo = simulationData.find(row => row.RunID === runID);
+
+    if (!runInfo) {
+        return;
+    }
+
+    const legendText =
+        `mus = ${runInfo.mus}, mua = ${runInfo.mua}, z = ${runInfo.DomainZ} mm`;
+
+    document.getElementById('selectedRun').textContent =
+        `Detector distribution: ${runID}`;
 
 
-            fetch(`data_v2/runs/${runID}.csv`)
-                .then(response => {
+    fetch(`data/runs/${runID}.csv`)
+        .then(response => {
 
-                    if (!response.ok) {
-                        throw new Error(
-                            `Could not load ${runID}`
-                        );
-                    }
+            if (!response.ok) {
+                throw new Error(`Could not load ${runID}`);
+            }
 
-                    return response.text();
+            return response.text();
 
-                })
-                .then(text => {
+        })
+        .then(text => {
 
-                    const lines =
-                        text.trim().split(/\r?\n/);
+            const lines = text.trim().split(/\r?\n/);
 
+            const x = [];
+            const y = [];
 
-                    const x = [];
-                    const y = [];
+            lines.slice(1).forEach(line => {
 
+                const values = line.split(',');
 
-                    lines.slice(1).forEach(line => {
+                x.push(Number(values[0]));
+                y.push(Number(values[1]));
 
-                        const values =
-                            line.split(',');
-
-                        x.push(
-                            Number(values[0])
-                        );
-
-                        y.push(
-                            Number(values[1])
-                        );
-
-                    });
+            });
 
 
-                    const trace = {
+            const trace = {
 
-                        x: x,
+                x: x,
+                y: y,
 
-                        y: y,
+                mode: 'lines+markers',
+                type: 'scatter',
 
-                        mode: 'lines+markers',
+                name: legendText,
 
-                        type: 'scatter',
+                showlegend: true
 
-                        name: runID
-
-                    };
-
-
-                    const layout = {
-
-                        xaxis: {
-                            title: 'x bin position'
-                        },
-
-                        yaxis: {
-                            title: 'Escaping photon weight'
-                        },
-
-                        title: runID
-
-                    };
+            };
 
 
-                    Plotly.react(
-                        'runGraph',
-                        [trace],
-                        layout,
-                        {
-                            responsive: true
-                        }
-                    );
+            const layout = {
 
-                })
-                .catch(error => {
+                title: `Detector Distribution — ${runID}`,
 
-                    document.getElementById(
-                        'selectedRun'
-                    ).textContent =
-                        `Error: ${error.message}`;
+                xaxis: {
+                    title: 'X position (mm)'
+                },
 
-                });
+                yaxis: {
+                    title: 'Escaping photon weight'
+                },
 
-        }
+                showlegend: true,
+
+                legend: {
+                    x: 1,
+                    y: 1
+                }
+
+            };
+
+
+            Plotly.react(
+                'runGraph',
+                [trace],
+                layout,
+                {
+                    responsive: true
+                }
+            );
+
+        })
+        .catch(error => {
+
+            document.getElementById('selectedRun').textContent =
+                `Error: ${error.message}`;
+
+        });
+
+}
 
     </script>
 
