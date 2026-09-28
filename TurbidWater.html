@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
 
@@ -30,24 +31,34 @@
 
     <hr>
 
-    <h3 id="selectedRun">Click a data point to view its detector distribution</h3>
+    <h3 id="selectedRun">
+        Click data points to compare their detector distributions
+    </h3>
+
+    <button id="clearRuns">
+        Clear detector graphs
+    </button>
+
+    <br><br>
 
     <div id="runGraph" style="width:100%; height:500px;"></div>
-    The <strong>x-axis</strong> represents the position where photons exit the detector surface.
-    The <strong>y-axis</strong>, labeled <strong>Escaping Photon Weight</strong>, is the sum of the
-    remaining statistical weights of all photons exiting within each spatial bin.
+
+    <p>
+        The <strong>x-axis</strong> represents the position where photons exit the detector surface.
+        The <strong>y-axis</strong>, labeled <strong>Escaping Photon Weight</strong>, is the sum of the
+        remaining statistical weights of all photons exiting within each spatial bin.
     </p>
 
     <p>
-    This is not simply the number of detected photons. Photons lose weight as energy is absorbed
-    while traveling through the simulated medium. Therefore, photons that experience greater
-    absorption contribute less to the detected signal.
+        This is not simply the number of detected photons. Photons lose weight as energy is absorbed
+        while traveling through the simulated medium. Therefore, photons that experience greater
+        absorption contribute less to the detected signal.
     </p>
 
     <p>
-    Escaping photon weight can be interpreted as a <strong>relative detected intensity</strong>.
-    However, it does not currently have physical units such as W/m² because the simulation does
-    not specify an absolute optical source power.
+        Escaping photon weight can be interpreted as a <strong>relative detected intensity</strong>.
+        However, it does not currently have physical units such as W/m² because the simulation does
+        not specify an absolute optical source power.
     </p>
 
 
@@ -55,6 +66,9 @@
 
         let simulationData = [];
         let columnNames = [];
+
+        let detectorTraces = [];
+        let loadedRunIDs = new Set();
 
 
         fetch('data_v2/summary_v2.csv')
@@ -92,22 +106,32 @@
                     `Loaded ${simulationData.length} simulations.`;
 
 
-                const xAxis = document.getElementById('xAxis');
-                const yAxis = document.getElementById('yAxis');
+                const xAxis =
+                    document.getElementById('xAxis');
+
+                const yAxis =
+                    document.getElementById('yAxis');
 
 
                 columnNames.forEach(column => {
 
                     if (column !== 'RunID') {
 
-                        const xOption = document.createElement('option');
+                        const xOption =
+                            document.createElement('option');
+
                         xOption.value = column;
                         xOption.textContent = column;
+
                         xAxis.appendChild(xOption);
 
-                        const yOption = document.createElement('option');
+
+                        const yOption =
+                            document.createElement('option');
+
                         yOption.value = column;
                         yOption.textContent = column;
+
                         yAxis.appendChild(yOption);
 
                     }
@@ -122,8 +146,11 @@
                 const musSelect =
                     document.getElementById('musSelect');
 
+
                 const musValues = [
-                    ...new Set(simulationData.map(row => row.mus))
+                    ...new Set(
+                        simulationData.map(row => row.mus)
+                    )
                 ].sort((a, b) => a - b);
 
 
@@ -143,8 +170,11 @@
                 const muaOptions =
                     document.getElementById('muaOptions');
 
+
                 const muaValues = [
-                    ...new Set(simulationData.map(row => row.mua))
+                    ...new Set(
+                        simulationData.map(row => row.mua)
+                    )
                 ].sort((a, b) => a - b);
 
 
@@ -203,17 +233,20 @@
                         document.getElementById('graph');
 
 
-                    graph.on('plotly_click', function(eventData) {
+                    graph.on(
+                        'plotly_click',
+                        function(eventData) {
 
-                        const point =
-                            eventData.points[0];
+                            const point =
+                                eventData.points[0];
 
-                        const runID =
-                            point.customdata;
+                            const runID =
+                                point.customdata;
 
-                        loadRun(runID);
+                            loadRun(runID);
 
-                    });
+                        }
+                    );
 
                 });
 
@@ -243,11 +276,14 @@
                 ).value;
 
 
-            const selectedMua = Array.from(
-                document.querySelectorAll(
-                    '#muaOptions input:checked'
-                )
-            ).map(box => Number(box.value));
+            const selectedMua =
+                Array.from(
+                    document.querySelectorAll(
+                        '#muaOptions input:checked'
+                    )
+                ).map(
+                    box => Number(box.value)
+                );
 
 
             const traces = [];
@@ -262,8 +298,10 @@
                     );
 
 
-                filtered.sort((a, b) =>
-                    a[selectedX] - b[selectedX]
+                filtered.sort(
+                    (a, b) =>
+                        a[selectedX] -
+                        b[selectedX]
                 );
 
 
@@ -336,103 +374,176 @@
 
         function loadRun(runID) {
 
-    const runInfo = simulationData.find(row => row.RunID === runID);
-
-    if (!runInfo) {
-        return;
-    }
-
-    const legendText =
-        `mus = ${runInfo.mus}, mua = ${runInfo.mua}, z = ${runInfo.DomainZ} mm`;
-
-    document.getElementById('selectedRun').textContent =
-        `Detector distribution: ${runID}`;
-
-
-    fetch(`data_v2/runs/${runID}.csv`)
-        .then(response => {
-
-            if (!response.ok) {
-                throw new Error(`Could not load ${runID}`);
+            if (loadedRunIDs.has(runID)) {
+                return;
             }
 
-            return response.text();
 
-        })
-        .then(text => {
-
-            const lines = text.trim().split(/\r?\n/);
-
-            const x = [];
-            const y = [];
-
-            lines.slice(1).forEach(line => {
-
-                const values = line.split(',');
-
-                x.push(Number(values[0]));
-                y.push(Number(values[1]));
-
-            });
+            const runInfo =
+                simulationData.find(
+                    row => row.RunID === runID
+                );
 
 
-            const trace = {
-
-                x: x,
-                y: y,
-
-                mode: 'lines+markers',
-                type: 'scatter',
-
-                name: legendText,
-
-                showlegend: true
-
-            };
+            if (!runInfo) {
+                return;
+            }
 
 
-            const layout = {
-
-                title: `Detector Distribution — ${runID}`,
-
-                xaxis: {
-                    title: 'X position (mm)'
-                },
-
-                yaxis: {
-                    title: 'Escaping photon weight'
-                },
-
-                showlegend: true,
-
-                legend: {
-                    x: 1,
-                    y: 1
-                }
-
-            };
+            const legendText =
+                `mus=${runInfo.mus}, ` +
+                `mua=${runInfo.mua}, ` +
+                `z=${runInfo.DomainZ} mm`;
 
 
-            Plotly.react(
-                'runGraph',
-                [trace],
-                layout,
-                {
-                    responsive: true
-                }
-            );
+            fetch(`data_v2/runs/${runID}.csv`)
 
-        })
-        .catch(error => {
+                .then(response => {
 
-            document.getElementById('selectedRun').textContent =
-                `Error: ${error.message}`;
+                    if (!response.ok) {
 
-        });
+                        throw new Error(
+                            `Could not load ${runID}`
+                        );
 
-}
+                    }
+
+                    return response.text();
+
+                })
+
+                .then(text => {
+
+                    const lines =
+                        text.trim().split(/\r?\n/);
+
+
+                    const x = [];
+                    const y = [];
+
+
+                    lines.slice(1).forEach(line => {
+
+                        const values =
+                            line.split(',');
+
+                        x.push(
+                            Number(values[0])
+                        );
+
+                        y.push(
+                            Number(values[1])
+                        );
+
+                    });
+
+
+                    const trace = {
+
+                        x: x,
+                        y: y,
+
+                        mode: 'lines+markers',
+
+                        type: 'scatter',
+
+                        name: legendText,
+
+                        customdata:
+                            x.map(() => runID),
+
+                        hovertemplate:
+                            `Run: %{customdata}<br>` +
+                            `X: %{x} mm<br>` +
+                            `Photon weight: %{y}` +
+                            `<extra></extra>`
+
+                    };
+
+
+                    detectorTraces.push(trace);
+
+                    loadedRunIDs.add(runID);
+
+
+                    const layout = {
+
+                        title:
+                            'Detector Distribution Comparison',
+
+                        xaxis: {
+                            title: 'X position (mm)'
+                        },
+
+                        yaxis: {
+                            title: 'Escaping photon weight'
+                        },
+
+                        showlegend: true,
+
+                        legend: {
+                            title: {
+                                text: 'Simulation parameters'
+                            }
+                        }
+
+                    };
+
+
+                    Plotly.react(
+                        'runGraph',
+                        detectorTraces,
+                        layout,
+                        {
+                            responsive: true
+                        }
+                    );
+
+
+                    document.getElementById(
+                        'selectedRun'
+                    ).textContent =
+                        `${detectorTraces.length} detector distribution(s) displayed`;
+
+                })
+
+                .catch(error => {
+
+                    document.getElementById(
+                        'selectedRun'
+                    ).textContent =
+                        `Error: ${error.message}`;
+
+                });
+
+        }
+
+
+
+        document.getElementById(
+            'clearRuns'
+        ).addEventListener(
+            'click',
+            function() {
+
+                detectorTraces = [];
+
+                loadedRunIDs.clear();
+
+                Plotly.purge(
+                    'runGraph'
+                );
+
+                document.getElementById(
+                    'selectedRun'
+                ).textContent =
+                    'Click data points to compare their detector distributions';
+
+            }
+        );
 
     </script>
 
 </body>
+
 </html>
