@@ -39,6 +39,9 @@
         Clear detector graphs
     </button>
 
+    <input type="checkbox" id="showGammaLegend" checked>
+    <label for="showGammaLegend">Show gamma fit entries in legend</label>
+
     <br><br>
 
     <div id="runGraph" style="width:100%; height:500px;"></div>
@@ -537,6 +540,10 @@
 
                             name: fitLegendText,
 
+                            meta: 'gammaFit',
+
+                            showlegend: gammaLegendVisible(),
+
                             line: {
                                 dash: 'dash'
                             },
@@ -553,50 +560,13 @@
                     loadedRunIDs.add(runID);
 
 
-                    const layout = {
-
-                        title:
-                            'Off-Beam Detector Response Profile',
-
-                        xaxis: {
-                            title: 'X position (mm)'
-                        },
-
-                        yaxis: {
-                            title: 'Escaping photon weight'
-                        },
-
-                        showlegend: true,
-
-                        legend: {
-                            title: {
-                                text: 'Simulation parameters',
-                                font: {
-                                    size: 24
-                                }
-                            },
-                            font: {
-                                size: 24
-                            }
-                        },
-
-                    };
-
-
-                    Plotly.react(
-                        'runGraph',
-                        detectorTraces,
-                        layout,
-                        {
-                            responsive: true
-                        }
-                    );
+                    renderRunGraph();
 
 
                     document.getElementById(
                         'selectedRun'
                     ).textContent =
-                        `${detectorTraces.length} detector distribution(s) displayed`;
+                        `${loadedRunIDs.size} detector distribution(s) displayed`;
 
                 })
 
@@ -610,6 +580,86 @@
                 });
 
         }
+
+
+
+        function gammaLegendVisible() {
+
+            return document.getElementById(
+                'showGammaLegend'
+            ).checked;
+
+        }
+
+
+
+        function renderRunGraph() {
+
+            const layout = {
+
+                title:
+                    'Off-Beam Detector Response Profile',
+
+                xaxis: {
+                    title: 'X position (mm)'
+                },
+
+                yaxis: {
+                    title: 'Escaping photon weight'
+                },
+
+                showlegend: true,
+
+                legend: {
+                    title: {
+                        text: 'Simulation parameters',
+                        font: {
+                            size: 24
+                        }
+                    },
+                    font: {
+                        size: 24
+                    }
+                },
+
+            };
+
+
+            return Plotly.react(
+                'runGraph',
+                detectorTraces,
+                layout,
+                {
+                    responsive: true
+                }
+            );
+
+        }
+
+
+
+        document.getElementById(
+            'showGammaLegend'
+        ).addEventListener(
+            'change',
+            function() {
+
+                const show = gammaLegendVisible();
+
+                detectorTraces.forEach(trace => {
+
+                    if (trace.meta === 'gammaFit') {
+                        trace.showlegend = show;
+                    }
+
+                });
+
+                if (detectorTraces.length > 0) {
+                    renderRunGraph();
+                }
+
+            }
+        );
 
 
 
