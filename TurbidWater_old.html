@@ -70,13 +70,8 @@
         let detectorTraces = [];
         let loadedRunIDs = new Set();
 
-        // Columns that aren't plottable numeric quantities: the run
-        // identifier, and the Gamma-fit status flag ("ok" / "failed" /
-        // "skipped"), which is text, not a number.
-        const NON_NUMERIC_COLUMNS = new Set(['RunID', 'GammaFitStatus']);
 
-
-        fetch('data_v2/summary_v2_with_gamma.csv')
+        fetch('data_v2/summary_v2.csv')
             .then(response => response.text())
             .then(text => {
 
@@ -94,7 +89,7 @@
 
                     columnNames.forEach((column, i) => {
 
-                        if (NON_NUMERIC_COLUMNS.has(column)) {
+                        if (column === 'RunID') {
                             row[column] = values[i];
                         } else {
                             row[column] = Number(values[i]);
@@ -120,7 +115,7 @@
 
                 columnNames.forEach(column => {
 
-                    if (!NON_NUMERIC_COLUMNS.has(column)) {
+                    if (column !== 'RunID') {
 
                         const xOption =
                             document.createElement('option');
@@ -383,35 +378,6 @@
 
 
 
-        function gammaCurve(xMin, xMax, A, k, theta, nPoints = 300) {
-
-            // Evaluate A * x^(k-1) * exp(-x/theta) on a smooth grid,
-            // rather than only at the raw bin positions, so the overlay
-            // reads as a continuous curve instead of a jagged line.
-
-            const x = [];
-            const y = [];
-
-            const start = Math.max(xMin, 1e-6);
-            const step = (xMax - start) / (nPoints - 1);
-
-            for (let i = 0; i < nPoints; i++) {
-
-                const xi = start + i * step;
-
-                x.push(xi);
-                y.push(
-                    A * Math.pow(xi, k - 1) * Math.exp(-xi / theta)
-                );
-
-            }
-
-            return { x, y };
-
-        }
-
-
-
         function loadRun(runID) {
 
             if (loadedRunIDs.has(runID)) {
@@ -430,23 +396,10 @@
             }
 
 
-            const hasFit =
-                runInfo.GammaFitStatus === 'ok' &&
-                Number.isFinite(runInfo.GammaA_fit) &&
-                Number.isFinite(runInfo.GammaK_fit) &&
-                Number.isFinite(runInfo.GammaTheta_fit);
-
-
             const legendText =
                 `mus=${runInfo.mus}, ` +
                 `mua=${runInfo.mua}, ` +
                 `z=${runInfo.DomainZ} mm`;
-
-
-            const fitLegendText = hasFit ?
-                `Gamma fit (peak=${runInfo.GammaPeak_fit.toFixed(1)} mm, ` +
-                `R²=${runInfo.GammaR2_fit.toFixed(3)})` :
-                null;
 
 
             fetch(`data_v2/runs/${runID}.csv`)
@@ -515,40 +468,6 @@
 
 
                     detectorTraces.push(trace);
-
-                    if (hasFit) {
-
-                        const fitCurve = gammaCurve(
-                            Math.min(...x),
-                            Math.max(...x),
-                            runInfo.GammaA_fit,
-                            runInfo.GammaK_fit,
-                            runInfo.GammaTheta_fit
-                        );
-
-                        detectorTraces.push({
-
-                            x: fitCurve.x,
-                            y: fitCurve.y,
-
-                            mode: 'lines',
-
-                            type: 'scatter',
-
-                            name: fitLegendText,
-
-                            line: {
-                                dash: 'dash'
-                            },
-
-                            hovertemplate:
-                                `X: %{x:.1f} mm<br>` +
-                                `Fitted weight: %{y:.1f}` +
-                                `<extra></extra>`
-
-                        });
-
-                    }
 
                     loadedRunIDs.add(runID);
 
