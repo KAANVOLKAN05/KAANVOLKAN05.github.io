@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+
+    <p id="status">Loading CSV...</p>
+
+    <label for="musSelect">mus:</label>
+    <select id="musSelect"></select>
+
+    <p>mua values:</p>
+    <div id="muaOptions"></div>
+
+    <br>
+
+    <label for="xAxis">X axis:</label>
+    <select id="xAxis"></select>
+
+    <label for="yAxis">Y axis:</label>
+    <select id="yAxis"></select>
+
+    <br><br>
+
+    <div id="graph" style="width:100%; height:600px;"></div>
+
+    <hr>
+
+    <h3 id="selectedRun">
+        Click data points to compare their detector distributions
+    </h3>
+
+    <button id="clearRuns">
+        Clear detector graphs
+    </button>
+
+    <input type="checkbox" id="showGammaLegend" checked>
+    <label for="showGammaLegend">Show gamma fit entries in legend</label>
+
+    <br><br>
+
+    <div id="runGraph" style="width:100%; height:500px;"></div>
+
+    <p>
+        The <strong>x-axis</strong> represents the position where photons exit the detector surface.
+        The <strong>y-axis</strong>, labeled <strong>Escaping Photon Weight</strong>, is the sum of the
+        remaining statistical weights of all photons exiting within each spatial bin.
+    </p>
+
+    <p>
+        This is not simply the number of detected photons. Photons lose weight as energy is absorbed
+        while traveling through the simulated medium. Therefore, photons that experience greater
+        absorption contribute less to the detected signal.
+    </p>
+
+    <p>
+        Escaping photon weight can be interpreted as a <strong>relative detected intensity</strong>.
+        However, it does not currently have physical units such as W/m² because the simulation does
+        not specify an absolute optical source power.
+    </p>
+
+
+    <script>
+
+        let simulationData = [];
+        let columnNames = [];
+
+        let detectorTraces = [];
+        let loadedRunIDs = new Set();
+
+        // Columns that aren't plottable numeric quantities: the run
+        // identifier, and the Gamma-fit status flag ("ok" / "failed" /
+        // "skipped"), which is text, not a number.
+        const NON_NUMERIC_COLUMNS = new Set(['RunID', 'GammaFitStatus']);
+
+
+        fetch('data_v2/summary_v2_with_gamma.csv')
+            .then(response => response.text())
+            .then(text => {
+
+                const lines = text.trim().split(/\r?\n/);
+
+                columnNames = lines[0]
+                    .split(',')
+                    .map(column => column.trim());
+
+
+                simulationData = lines.slice(1).map(line => {
+
+                    const values = line.split(',');
+                    const row = {};
+
+                    columnNames.forEach((column, i) => {
+
+                        if (NON_NUMERIC_COLUMNS.has(column)) {
+                            row[column] = values[i];
+                        } else {
+                            row[column] = Number(values[i]);
+                        }
+
+                    });
+
+                    return row;
+
+                });
+
+
+                document.getElementById('status').textContent =
+                    `Loaded ${simulationData.length} simulations.`;
+
+
+                const xAxis =
+                    document.getElementById('xAxis');
+
+                const yAxis =
+                    document.getElementById('yAxis');
+
+
+                columnNames.forEach(column => {
+
+                    if (!NON_NUMERIC_COLUMNS.has(column)) {
+
+                        const xOption =
+                            document.createElement('option');
+
+                        xOption.value = column;
+                        xOption.textContent = column;
+
+                        xAxis.appendChild(xOption);
+
+
+                        const yOption =
+                            document.createElement('option');
+
+                        yOption.value = column;
+                        yOption.textContent = column;
+
+                        yAxis.appendChild(yOption);
+
+                    }
+
+                });
+
+
+                xAxis.value = 'DomainZ';
+                yAxis.value = 'WeightedMedianPosition';
+
+
+                const musSelect =
+                    document.getElementById('musSelect');
+
+
+                const musValues = [
+                    ...new Set(
+                        simulationData.map(row => row.mus)
+                    )
+                ].sort((a, b) => a - b);
+
+
+                musValues.forEach(value => {
+
+                    const option =
+                        document.createElement('option');
+
+                    option.value = value;
+                    option.textContent = value;
+
+                    musSelect.appendChild(option);
+
+                });
+
+
+                const muaOptions =
+                    document.getElementById('muaOptions');
+
+
+                const muaValues = [
+                    ...new Set(
+                        simulationData.map(row => row.mua)
+                    )
+                ].sort((a, b) => a - b);
+
+
+                muaValues.forEach(value => {
+
+                    const checkbox =
+                        document.createElement('input');
+
+                    checkbox.type = 'checkbox';
+                    checkbox.value = value;
+                    checkbox.id = `mua_${value}`;
+                    checkbox.checked = true;
+
+
+                    const label =
+                        document.createElement('label');
+
+                    label.htmlFor = checkbox.id;
+                    label.textContent = value;
+
+
+                    muaOptions.appendChild(checkbox);
+                    muaOptions.appendChild(label);
+                    muaOptions.appendChild(
+                        document.createElement('br')
+                    );
+
+
+                    checkbox.addEventListener(
+                        'change',
+                        updateGraph
+                    );
+
+                });
+
+
+                musSelect.addEventListener(
+                    'change',
+                    updateGraph
+                );
+
+                xAxis.addEventListener(
+                    'change',
+                    updateGraph
+                );
+
+                yAxis.addEventListener(
+                    'change',
+                    updateGraph
+                );
+
+
+                updateGraph().then(() => {
+
+                    const graph =
+                        document.getElementById('graph');
+
+
+                    graph.on(
+                        'plotly_click',
+                        function(eventData) {
+
+                            const point =
+                                eventData.points[0];
+
+                            const runID =
+                                point.customdata;
+
+                            loadRun(runID);
+
+                        }
+                    );
+
+                });
+
+            });
+
+
+
+        function updateGraph() {
+
+            const selectedMus =
+                Number(
+                    document.getElementById(
+                        'musSelect'
+                    ).value
+                );
+
+
+            const selectedX =
+                document.getElementById(
+                    'xAxis'
+                ).value;
+
+
+            const selectedY =
+                document.getElementById(
+                    'yAxis'
+                ).value;
+
+
+            const selectedMua =
+                Array.from(
+                    document.querySelectorAll(
+                        '#muaOptions input:checked'
+                    )
+                ).map(
+                    box => Number(box.value)
+                );
+
+
+            const traces = [];
+
+
+            selectedMua.forEach(muaValue => {
+
+                let filtered =
+                    simulationData.filter(row =>
+                        row.mus === selectedMus &&
+                        row.mua === muaValue
+                    );
+
+
+                filtered.sort(
+                    (a, b) =>
+                        a[selectedX] -
+                        b[selectedX]
+                );
+
+
+                traces.push({
+
+                    x: filtered.map(
+                        row => row[selectedX]
+                    ),
+
+                    y: filtered.map(
+                        row => row[selectedY]
+                    ),
+
+                    customdata: filtered.map(
+                        row => row.RunID
+                    ),
+
+                    mode: 'lines+markers',
+
+                    type: 'scatter',
+
+                    name: `mua = ${muaValue}`,
+
+                    hovertemplate:
+                        `${selectedX}: %{x}<br>` +
+                        `${selectedY}: %{y}<br>` +
+                        `Run: %{customdata}` +
+                        `<extra></extra>`
+
+                });
+
+            });
+
+
+            const layout = {
+
+                xaxis: {
+                    title: selectedX,
+                    font: { size: 24 }
+                },
+
+                yaxis: {
+                    title: selectedY,
+                    font: { size: 24 }
+                },
+
+                legend: {
+                    title: {
+                        text: 'mua',
+                        font: {
+                            size: 24
+                        }
+                    },
+                    font: {
+                        size: 24
+                    }
+                },
+
+                margin: {
+                    t: 30
+                }
+
+            };
+
+
+            return Plotly.react(
+                'graph',
+                traces,
+                layout,
+                {
+                    responsive: true
+                }
+            );
+
+        }
+
+
+
+        function gammaCurve(xMin, xMax, A, k, theta, nPoints = 300) {
+
+            // Evaluate A * x^(k-1) * exp(-x/theta) on a smooth grid,
+            // rather than only at the raw bin positions, so the overlay
+            // reads as a continuous curve instead of a jagged line.
+
+            const x = [];
+            const y = [];
+
+            const start = Math.max(xMin, 1e-6);
+            const step = (xMax - start) / (nPoints - 1);
+
+            for (let i = 0; i < nPoints; i++) {
+
+                const xi = start + i * step;
+
+                x.push(xi);
+                y.push(
+                    A * Math.pow(xi, k - 1) * Math.exp(-xi / theta)
+                );
+
+            }
+
+            return { x, y };
+
+        }
+
+
+
+        function loadRun(runID) {
+
+            if (loadedRunIDs.has(runID)) {
+                return;
+            }
+
+
+            const runInfo =
+                simulationData.find(
+                    row => row.RunID === runID
+                );
+
+
+            if (!runInfo) {
+                return;
+            }
+
+
+            const hasFit =
+                runInfo.GammaFitStatus === 'ok' &&
+                Number.isFinite(runInfo.GammaA_fit) &&
+                Number.isFinite(runInfo.GammaK_fit) &&
+                Number.isFinite(runInfo.GammaTheta_fit);
+
+
+            const legendText =
+                `mus=${runInfo.mus}, ` +
+                `mua=${runInfo.mua}, ` +
+                `z=${runInfo.DomainZ} mm`;
+
+
+            const fitLegendText = hasFit ?
+                `Gamma fit (peak=${runInfo.GammaPeak_fit.toFixed(1)} mm, ` +
+                `R²=${runInfo.GammaR2_fit.toFixed(3)})` :
+                null;
+
+
+            fetch(`data_v2/runs/${runID}.csv`)
+
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Could not load ${runID}`
+                        );
+
+                    }
+
+                    return response.text();
+
+                })
+
+                .then(text => {
+
+                    const lines =
+                        text.trim().split(/\r?\n/);
+
+
+                    const x = [];
+                    const y = [];
+
+
+                    lines.slice(1).forEach(line => {
+
+                        const values =
+                            line.split(',');
+
+                        x.push(
+                            Number(values[0])
+                        );
+
+                        y.push(
+                            Number(values[1])
+                        );
+
+                    });
+
+
+                    const trace = {
+
+                        x: x,
+                        y: y,
+
+                        mode: 'markers',
+
+                        type: 'scatter',
+
+                        name: legendText,
+
+                        customdata:
+                            x.map(() => runID),
+
+                        hovertemplate:
+                            `Run: %{customdata}<br>` +
+                            `X: %{x} mm<br>` +
+                            `Photon weight: %{y}` +
+                            `<extra></extra>`
+
+                    };
+
+
+                    detectorTraces.push(trace);
+
+                    if (hasFit) {
+
+                        const fitCurve = gammaCurve(
+                            Math.min(...x),
+                            Math.max(...x),
+                            runInfo.GammaA_fit,
+                            runInfo.GammaK_fit,
+                            runInfo.GammaTheta_fit
+                        );
+
+                        detectorTraces.push({
+
+                            x: fitCurve.x,
+                            y: fitCurve.y,
+
+                            mode: 'lines',
+
+                            type: 'scatter',
+
+                            name: fitLegendText,
+
+                            meta: 'gammaFit',
+
+                            showlegend: gammaLegendVisible(),
+
+                            line: {
+                                dash: 'dash',
+                                width: 4
+                            },
+
+                            hovertemplate:
+                                `X: %{x:.1f} mm<br>` +
+                                `Fitted weight: %{y:.1f}` +
+                                `<extra></extra>`
+
+                        });
+
+                    }
+
+                    loadedRunIDs.add(runID);
+
+
+                    renderRunGraph();
+
+
+                    document.getElementById(
+                        'selectedRun'
+                    ).textContent =
+                        `${loadedRunIDs.size} detector distribution(s) displayed`;
+
+                })
+
+                .catch(error => {
+
+                    document.getElementById(
+                        'selectedRun'
+                    ).textContent =
+                        `Error: ${error.message}`;
+
+                });
+
+        }
+
+
+
+        function gammaLegendVisible() {
+
+            return document.getElementById(
+                'showGammaLegend'
+            ).checked;
+
+        }
+
+
+
+        function renderRunGraph() {
+
+            const layout = {
+
+                title:
+                    'Off-Beam Detector Response Profile',
+
+                xaxis: {
+                    title: 'X position (mm)'
+                },
+
+                yaxis: {
+                    title: 'Escaping photon weight'
+                },
+
+                showlegend: true,
+
+                legend: {
+                    title: {
+                        text: 'Simulation parameters',
+                        font: {
+                            size: 24
+                        }
+                    },
+                    font: {
+                        size: 24
+                    }
+                },
+
+            };
+
+
+            return Plotly.react(
+                'runGraph',
+                detectorTraces,
+                layout,
+                {
+                    responsive: true
+                }
+            );
+
+        }
+
+
+
+        document.getElementById(
+            'showGammaLegend'
+        ).addEventListener(
+            'change',
+            function() {
+
+                const show = gammaLegendVisible();
+
+                detectorTraces.forEach(trace => {
+
+                    if (trace.meta === 'gammaFit') {
+                        trace.showlegend = show;
+                    }
+
+                });
+
+                if (detectorTraces.length > 0) {
+                    renderRunGraph();
+                }
+
+            }
+        );
+
+
+
+        document.getElementById(
+            'clearRuns'
+        ).addEventListener(
+            'click',
+            function() {
+
+                detectorTraces = [];
+
+                loadedRunIDs.clear();
+
+                Plotly.purge(
+                    'runGraph'
+                );
+
+                document.getElementById(
+                    'selectedRun'
+                ).textContent =
+                    'Click data points to compare their detector distributions';
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

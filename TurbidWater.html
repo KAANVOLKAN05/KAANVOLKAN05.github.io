@@ -9,6 +9,88 @@
 
 <body>
 
+    <section id="intro" style="max-width: 80ch; line-height: 1.5;">
+
+        <h1>Turbid Water: Off-Beam Detector Design Explorer</h1>
+
+        <p>
+            This page is an interactive companion to the report
+            <em>Water Turbidity Results</em> (Kaan Volkan, 2026). It lets you browse
+            a database of Monte Carlo simulations of light scattering in turbid water,
+            built to help design the off-beam (nephelometric) detector of a low-cost
+            turbidity meter.
+        </p>
+
+        <h2>The problem</h2>
+
+        <p>
+            A classical turbidity meter shines a light source through the water and
+            measures scattered light with a detector placed off the beam line. Where
+            that detector should sit depends on the water's inherent optical
+            properties (IOPs): the scattering coefficient &mu;<sub>s</sub>, the
+            absorption coefficient &mu;<sub>a</sub>, and the volume scattering
+            function. The instrument has to be designed for the very range of water
+            it is meant to measure. These simulations map out that design space so
+            the detector position can be chosen for the expected conditions.
+        </p>
+
+        <h2>The simulations</h2>
+
+        <p>
+            Photon transport was simulated with Monte Carlo eXtreme (MCX) using
+            10<sup>7</sup> photons per run in a homogeneous rectangular domain with
+            1 mm voxels and absorbing boundaries. A pencil-beam source sits on one
+            face at a height of 50 mm and points along the x axis. Photons leaving
+            the domain through a 1 mm wide strip on the top face are recorded and
+            binned by x position, so each bin acts as a 1 mm<sup>2</sup> off-beam
+            detector. The domain height, DomainZ, sets the detector height: the
+            distance from the beam line to the detector is DomainZ &minus; 50 mm.
+        </p>
+
+        <p>
+            Scattering follows the Fournier&ndash;Forand phase function (Junge
+            parameter 3.56, relative refractive index 1.09, backscatter fraction
+            B<sub>FF</sub> = 0.0144), which reproduces the strongly forward-peaked
+            scattering measured in natural waters better than Henyey&ndash;Greenstein.
+            The database covers &mu;<sub>s</sub> = 0.01&ndash;0.1 mm<sup>&minus;1</sup>
+            and &mu;<sub>a</sub> = 0.001&ndash;0.005 mm<sup>&minus;1</sup> over a
+            range of detector heights. The simulations were validated against
+            Beer&ndash;Lambert attenuation with no scattering, near-isotropic spread
+            at very high scattering, and a numerical 1D radiative transfer solution.
+        </p>
+
+        <h2>Using the plotter</h2>
+
+        <p>
+            The first plot summarizes every run. Choose &mu;<sub>s</sub> from the
+            dropdown, tick the &mu;<sub>a</sub> values to compare, and pick the
+            quantity to show on the y axis; the x axis is the detector height.
+            Clicking any point loads that run's off-beam detector response profile
+            into the second plot, where you can overlay several runs.
+        </p>
+
+        <p>
+            The response profile shows the escaping photon weight along the detector
+            strip: the summed statistical weight of photons leaving each 1 mm bin.
+            It is a relative detected intensity, not an absolute power. Each profile
+            is fitted with a gamma distribution,
+            D(x) = A&middot;x<sup>k&minus;1</sup>&middot;e<sup>&minus;x/&theta;</sup>,
+            whose peak at x = (k&minus;1)&theta; gives the detector position along x
+            that receives the most light.
+        </p>
+
+        <p>
+            In the simulated range, placing the detector closer to the beam line both
+            increases the received signal and makes it more sensitive to changes in
+            &mu;<sub>s</sub>, and therefore to turbidity. As the detector moves
+            farther from the beam, the optimal x position shifts away from the source
+            and the peak signal falls roughly exponentially.
+        </p>
+
+    </section>
+
+    <hr>
+
     <p id="status">Loading CSV...</p>
 
     <label for="musSelect">mus:</label>
@@ -18,9 +100,6 @@
     <div id="muaOptions"></div>
 
     <br>
-
-    <label for="xAxis">X axis:</label>
-    <select id="xAxis"></select>
 
     <label for="yAxis">Y axis:</label>
     <select id="yAxis"></select>
@@ -78,6 +157,12 @@
         // "skipped"), which is text, not a number.
         const NON_NUMERIC_COLUMNS = new Set(['RunID', 'GammaFitStatus']);
 
+        // Simulation inputs: these are already set by the mus dropdown,
+        // the mua checkboxes and the fixed DomainZ x axis, so plotting
+        // them on the y axis only gives flat or trivial lines. Add any
+        // other input columns from the CSV here to hide them as well.
+        const INPUT_COLUMNS = new Set(['mus', 'mua', 'DomainZ']);
+
 
         fetch('data_v2/summary_v2_with_gamma.csv')
             .then(response => response.text())
@@ -114,25 +199,16 @@
                     `Loaded ${simulationData.length} simulations.`;
 
 
-                const xAxis =
-                    document.getElementById('xAxis');
-
                 const yAxis =
                     document.getElementById('yAxis');
 
 
                 columnNames.forEach(column => {
 
-                    if (!NON_NUMERIC_COLUMNS.has(column)) {
-
-                        const xOption =
-                            document.createElement('option');
-
-                        xOption.value = column;
-                        xOption.textContent = column;
-
-                        xAxis.appendChild(xOption);
-
+                    if (
+                        !NON_NUMERIC_COLUMNS.has(column) &&
+                        !INPUT_COLUMNS.has(column)
+                    ) {
 
                         const yOption =
                             document.createElement('option');
@@ -147,7 +223,6 @@
                 });
 
 
-                xAxis.value = 'DomainZ';
                 yAxis.value = 'WeightedMedianPosition';
 
 
@@ -224,11 +299,6 @@
                     updateGraph
                 );
 
-                xAxis.addEventListener(
-                    'change',
-                    updateGraph
-                );
-
                 yAxis.addEventListener(
                     'change',
                     updateGraph
@@ -272,10 +342,9 @@
                 );
 
 
-            const selectedX =
-                document.getElementById(
-                    'xAxis'
-                ).value;
+            // The only parameter that varies along each trace is the
+            // detector height, so the x axis is fixed to DomainZ.
+            const selectedX = 'DomainZ';
 
 
             const selectedY =
@@ -334,7 +403,7 @@
                     name: `mua = ${muaValue}`,
 
                     hovertemplate:
-                        `${selectedX}: %{x}<br>` +
+                        `z: %{x} mm<br>` +
                         `${selectedY}: %{y}<br>` +
                         `Run: %{customdata}` +
                         `<extra></extra>`
@@ -347,13 +416,17 @@
             const layout = {
 
                 xaxis: {
-                    title: selectedX,
-                    font: { size: 24 }
+                    title: {
+                        text: 'Detector height z (mm)',
+                        font: { size: 24 }
+                    }
                 },
 
                 yaxis: {
-                    title: selectedY,
-                    font: { size: 24 }
+                    title: {
+                        text: selectedY,
+                        font: { size: 24 }
+                    }
                 },
 
                 legend: {
