@@ -15,8 +15,8 @@
 
         <p>
             This page is an interactive companion to the report
-            <em>Water Turbidity Results</em> (Kaan Volkan, 2026). It lets you browse
-            a database of Monte Carlo simulations of light scattering in turbid water,
+            <em>Water Turbidity Results</em> (Kaan Volkan, 2026). It provides a data base of 
+            Monte Carlo simulations of light scattering in turbid water,
             built to help design the off-beam (nephelometric) detector of a low-cost
             turbidity meter.
         </p>
@@ -25,9 +25,9 @@
 
         <p>
             A classical turbidity meter shines a light source through the water and
-            measures scattered light with a detector placed off the beam line. Where
-            that detector should sit depends on the water's inherent optical
-            properties (IOPs): the scattering coefficient &mu;<sub>s</sub>, the
+            measures scattered light with a detector placed off the beam line. 
+            The ideal position of detector along the x and z axis depends on the water's inherent optical
+            properties (IOPs), namely the scattering coefficient &mu;<sub>s</sub>, the
             absorption coefficient &mu;<sub>a</sub>, and the volume scattering
             function. The instrument has to be designed for the very range of water
             it is meant to measure. These simulations map out that design space so
@@ -37,7 +37,7 @@
         <h2>The simulations</h2>
 
         <p>
-            Photon transport was simulated with Monte Carlo eXtreme (MCX) using
+            I used Monte Carlo eXtreme (MCX) with 
             10<sup>7</sup> photons per run in a homogeneous rectangular domain with
             1 mm voxels and absorbing boundaries. A pencil-beam source sits on one
             face at a height of 50 mm and points along the x axis. Photons leaving
@@ -50,7 +50,7 @@
         <p>
             Scattering follows the Fournier&ndash;Forand phase function (Junge
             parameter 3.56, relative refractive index 1.09, backscatter fraction
-            B<sub>FF</sub> = 0.0144), which reproduces the strongly forward-peaked
+            B<sub>FF</sub> = 0.0144). This models the strongly forward-peaked
             scattering measured in natural waters better than Henyey&ndash;Greenstein.
             The database covers &mu;<sub>s</sub> = 0.01&ndash;0.1 mm<sup>&minus;1</sup>
             and &mu;<sub>a</sub> = 0.001&ndash;0.005 mm<sup>&minus;1</sup> over a
